@@ -1,0 +1,16 @@
+dependencies:
+  - smartcontractkit/chainlink-brownie-contracts@1.0.2
+  - OpenZeppelin/openzeppelin-contracts@3.4.0
+compiler:
+  solc:
+    remappings:
+      - '@chainlink=smartcontractkit/chainlink-brownie-contracts@1.0.2'
+      - '@openzeppelin=OpenZeppelin/openzeppelin-contracts@3.4.0'
+# automatically fetch contract sources from Etherscan
+autofetch_sources: True
+dotenv: '.env'
+wallets:
+  from_key: ${PRIVATE_KEY}
+networks:
+  testnet:
+    fee: 100000000000000000
