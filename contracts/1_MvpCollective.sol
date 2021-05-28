@@ -6,32 +6,39 @@ contract MvpCollectible is ERC721 {
     uint256 public tokenCounter;
     struct Sale{
         bool isForSelling;
-        uint price;
+        uint256 price;
     }
     uint256 internal fee;
+    address private _owner;
     mapping(uint256 => Sale) public tokenIdToSell;
 
     constructor () public ERC721 ("Mvp", "MVP"){
         tokenCounter = 0;
     }
 
+    /**
+    Create collectible by the caller. We default set price as 0,01
+    :param: tokenURI, string. URI of a json file which contains format of file metadata
+     */
+    event evtCreate(address from, string URI, uint256 tokenId);
     function createCollectible(string memory tokenURI) public returns (uint256) {
         uint256 newItemId = tokenCounter;
         _safeMint(msg.sender, newItemId);
         _setTokenURI(newItemId, tokenURI);
-        tokenIdToSell[newItemId].isForSelling = false;
-        tokenIdToSell[newItemId].price = 0;
+        tokenIdToSell[newItemId].isForSelling = true;
+        tokenIdToSell[newItemId].price = 0.01 * 10 ** 18;
         tokenCounter = tokenCounter + 1;
         fee = 0.1 * 10 ** 18;
+        emit evtCreate(msg.sender, tokenURI, newItemId);
         return newItemId;
     }
 
-    function setPrice(uint256 tokenId, uint price) public  {
+    function setPrice(uint256 tokenId, uint256 price) public  {
         require(msg.sender == ownerOf(tokenId));
         tokenIdToSell[tokenId].price = price;
     }
 
-    function getPrice(uint256 tokenId) public returns (uint price) {
+    function getPrice(uint256 tokenId) public returns (uint256 price) {
         price = tokenIdToSell[tokenId].price;
     }
 
@@ -50,14 +57,14 @@ contract MvpCollectible is ERC721 {
         tokenIdToSell[tokenId].isForSelling = false;
     }
 
-    event evtCompare(uint value, uint price);
+
+    event evtBuy(address from, address to, uint256 value);
     function buy(uint256 tokenId) public payable{
         uint price = tokenIdToSell[tokenId].price;
-        emit evtCompare(msg.value, price);
-        require(tokenIdToSell[tokenId].isForSelling == true, "Token is not selling");
+        //require(tokenIdToSell[tokenId].isForSelling == true, "Token is not selling");
         require(msg.value == price, "Invalid value for this token! ");
         payable(ownerOf(tokenId)).transfer(msg.value);
-        safeTransferFrom(ownerOf(tokenId), msg.sender, tokenId);
-        tokenIdToSell[tokenId].isForSelling = false;
+        _transfer(ownerOf(tokenId), msg.sender, tokenId);
+        emit evtBuy(ownerOf(tokenId), msg.sender, msg.value);
     }
 }

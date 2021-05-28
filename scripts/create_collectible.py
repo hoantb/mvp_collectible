@@ -10,16 +10,28 @@ metadata_template = {
 
 def main():
     dev = accounts.add(config["wallets"]["from_key"])
-    
-    print(network.show_active())
-    print(len(MvpCollectible))
-    mvp_collectible = MvpCollectible[len(MvpCollectible) - 1]
-    token_id = mvp_collectible.tokenCounter()
-    print(token_id)
-    mvp_collectible.createCollectible(metadata_template, {"from": dev})
+    print(dev.address)
+    dev_inter = accounts.add("26d3ee767995bd347584278bb88a9b8fd5dc7a58cc239b36db28e168ccb72292")
+    # print(network.show_active())
+    # print(len(MvpCollectible))
+    # mvp_collectible = MvpCollectible[len(MvpCollectible) - 1]
+    # token_id = mvp_collectible.tokenCounter()
+    # print(token_id)
+    #mvp_collectible.createCollectible(metadata_template, {"from": dev})
     #print(mvp_collectible.tokenURI(token_id))
-    mvp_collectible.setPrice(token_id, 0.01 * 10 ** 18, {"from": dev})
-    mvp_collectible.enableSell(token_id, {"from": dev})
+    #mvp_collectible.setPrice(7, 0.01 * 10 ** 18, {"from": dev})
+    #mvp_collectible.enableSell(3, {"from": dev})
+    #mvp_collectible.enableSell(4, {"from": dev})
+    # mvp_collectible.enableSell(6, {"from": dev})
+    #mvp_collectible.enableSell(2, {"from": dev})
+    # mvp_collectible.approve(dev_inter, 0, {"from": dev})
+    # mvp_collectible.approve(dev_inter, 1, {"from": dev})
+    # mvp_collectible.approve(dev_inter, 2, {"from": dev})
+    # mvp_collectible.approve(dev_inter, 3, {"from": dev})
+    #mvp_collectible.approve(dev_inter, 4, {"from": dev})
+    #mvp_collectible.approve(dev_inter, 7, {"from": dev})
+    #print(mvp_collectible.getIsForSelling(1, {"from": dev}))
+
 
     # print(mvp_collectible.tokenURI(0))
     #print(mvp_collectible.balanceOf('0xc24BC060a2305E35641c4A67F0Ee4aD932b2E083'))
