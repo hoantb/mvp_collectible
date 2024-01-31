@@ -1,11 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity 0.8.22;
 
+import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 
 contract MvpCollectible is ERC721URIStorage {
     uint256 public tokenCounter;
-    struct Sale{
+    struct Sale {
         bool isForSelling;
         uint price;
     }
@@ -16,6 +17,9 @@ contract MvpCollectible is ERC721URIStorage {
         tokenCounter = 0;
     }
 
+    /**
+     * create Collectible
+     */
     function createCollectible(string memory tokenURI) public returns (uint256) {
         uint256 newItemId = tokenCounter;
         _safeMint(msg.sender, newItemId);
@@ -27,30 +31,51 @@ contract MvpCollectible is ERC721URIStorage {
         return newItemId;
     }
 
+    /**
+     * set the price of the token
+     */
     function setPrice(uint256 tokenId, uint price) public  {
         require(msg.sender == ownerOf(tokenId));
         tokenIdToSell[tokenId].price = price;
     }
 
+    /**
+     * get the price of the token
+     */
     function getPrice(uint256 tokenId) public view  returns (uint price) {
         return tokenIdToSell[tokenId].price;
     }
 
-    function getIsForSelling(uint256 tokenId) public view  returns (bool isForSelling) {
+    /**
+     * get the token whether ready for selling or not
+     */
+    function isReadyForSelling(uint256 tokenId) public view  returns (bool isForSelling) {
         return tokenIdToSell[tokenId].isForSelling;
     }
 
-    function enableSell(uint256 tokenId) public  {
-        require(msg.sender == ownerOf(tokenId));
-        require(tokenIdToSell[tokenId].price > 0, "Please set price!");
-        tokenIdToSell[tokenId].isForSelling = true;
+    /**
+     * Seller enable or disable selling token
+     * We need to set price larger 0 before call this function
+     * If enabling is called successfully then any spender can buy this token
+     * without approving from the seller
+     */
+    function setReadyForSelling(uint256 tokenId, bool isSelling) public  {
+        if (isSelling) {
+            require(msg.sender == ownerOf(tokenId));
+            require(tokenIdToSell[tokenId].price > 0, "Please set price!");
+        }
+        tokenIdToSell[tokenId].isForSelling = isSelling;
     }
 
-    function disableSell(uint256 tokenId) public  {
-        require(msg.sender == ownerOf(tokenId));
-        tokenIdToSell[tokenId].isForSelling = false;
-    }
-
+    /**
+     * buy a token
+     * this function requeire the token is ready for selling
+     * and the input of spender must be equal with the price
+     * of the token
+     * after tranfering token successfully, owner of the token is changed
+     * and the token is not ready for selling
+     * and the price is same with the previous price
+     */
     event evtCompare(uint value, uint price);
     function buy(uint256 tokenId) public payable{
         uint price = tokenIdToSell[tokenId].price;
@@ -60,5 +85,15 @@ contract MvpCollectible is ERC721URIStorage {
         payable(ownerOf(tokenId)).transfer(msg.value);
         safeTransferFrom(ownerOf(tokenId), msg.sender, tokenId);
         tokenIdToSell[tokenId].isForSelling = false;
+    }
+
+    /**
+     * Override isApprovedForAll to ignore the approving step of seller
+     * because we use the isForSelling variable instead of aprroving step
+     */
+    function isApprovedForAll(address, address) override (ERC721, IERC721)
+    public pure returns (bool)
+    {
+        return true;
     }
 }
