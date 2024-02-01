@@ -60,8 +60,8 @@ contract MvpCollectible is ERC721URIStorage {
      * without approving from the seller
      */
     function setReadyForSelling(uint256 tokenId, bool isSelling) public  {
+        require(msg.sender == ownerOf(tokenId));
         if (isSelling) {
-            require(msg.sender == ownerOf(tokenId));
             require(tokenIdToSell[tokenId].price > 0, "Please set price!");
         }
         tokenIdToSell[tokenId].isForSelling = isSelling;
